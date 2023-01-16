@@ -12,7 +12,49 @@
  */
 package org.openhab.binding.ipcamera.internal.handler;
 
-import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.*;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.AMCREST_HANDLER;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.AMCREST_THING;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.AUTH_HANDLER;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.BIG_DECIMAL_SCALE_MOTION;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_ANIMAL_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_AUDIO_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_CAR_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_EXTERNAL_MOTION;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_FFMPEG_MOTION_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_FFMPEG_MOTION_CONTROL;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_GIF_HISTORY;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_GIF_HISTORY_LENGTH;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_GOTO_PRESET;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_HLS_URL;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_HUMAN_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_IMAGE;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_IMAGE_URL;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_LAST_MOTION_TYPE;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_MJPEG_URL;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_MOTION_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_MP4_HISTORY;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_MP4_HISTORY_LENGTH;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_PAN;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_PIR_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_POLL_IMAGE;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_RECORDING_GIF;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_RECORDING_MP4;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_RTSP_URL;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_START_STREAM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_TILT;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_ZOOM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.COMMON_HANDLER;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.DAHUA_THING;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.DOORBIRD_THING;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.FOSCAM_THING;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.GENERIC_THING;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.HIKVISION_THING;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.INSTAR_HANDLER;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.INSTAR_THING;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.ONVIF_THING;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.REOLINK_HANDLER;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.REOLINK_THING;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.SERVLET_PORT;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -1587,10 +1629,10 @@ public class IpCameraHandler extends BaseThingHandler {
                 break;
             case REOLINK_THING:
                 if (cameraConfig.getNvrChannel() > 0) {
-                    sendHttpGET("/api.cgi?cmd=GetAiState&channel=" + cameraConfig.getNvrChannel() + "&user="
-                            + cameraConfig.getUser() + "&password=" + cameraConfig.getPassword());
-                    sendHttpGET("/api.cgi?cmd=GetMdState&channel=" + cameraConfig.getNvrChannel() + "&user="
-                            + cameraConfig.getUser() + "&password=" + cameraConfig.getPassword());
+                    sendHttpGET("/api.cgi?cmd=GetAiState&channel=" + cameraConfig.getNvrChannel() + "&rs=openHAB"
+                            + reolinkAuth);
+                    sendHttpGET("/api.cgi?cmd=GetMdState&channel=" + cameraConfig.getNvrChannel() + "&rs=openHAB"
+                            + reolinkAuth);
                 } else {
                     if (!snapshotPolling) {
                         checkCameraConnection();
