@@ -214,7 +214,7 @@ public class IpCameraHandler extends BaseThingHandler {
 
     // basicAuth MUST remain private as it holds the cameraConfig.getPassword()
     private String basicAuth = "";
-    public String reolinkAuth = "&token=null";
+    public String reolinkAuth = "&token=";
     public boolean useBasicAuth = false;
     public boolean useDigestAuth = false;
     public boolean newInstarApi = false;
@@ -890,6 +890,7 @@ public class IpCameraHandler extends BaseThingHandler {
                     } else {
                         inputOptions = "-y -t " + gifRecordTime + " -hide_banner -loglevel warning";
                     }
+                    logger.trace("For camera {}, RTSP {}", cameraConfig.getNvrChannel(), rtspUri);
                     ffmpegGIF = new Ffmpeg(this, format, cameraConfig.getFfmpegLocation(), inputOptions, rtspUri,
                             cameraConfig.getGifOutOptions(), cameraConfig.getFfmpegOutput() + gifFilename + ".gif",
                             cameraConfig.getUser(), cameraConfig.getPassword());
@@ -1096,7 +1097,7 @@ public class IpCameraHandler extends BaseThingHandler {
         setChannelState(CHANNEL_RECORDING_GIF, DecimalType.valueOf(new String("" + seconds)));
     }
 
-    private void getReolinkToken() {
+    public void getReolinkToken() {
         sendHttpPOST("/api.cgi?cmd=Login",
                 "[{\"cmd\":\"Login\", \"param\":{ \"User\":{ \"Version\": \"0\", \"userName\":\""
                         + cameraConfig.getUser() + "\", \"password\":\"" + cameraConfig.getPassword() + "\"}}}]");
@@ -1628,7 +1629,7 @@ public class IpCameraHandler extends BaseThingHandler {
                 sendHttpGET("/cgi-bin/eventManager.cgi?action=getEventIndexes&code=AudioMutation");
                 break;
             case REOLINK_THING:
-                if (cameraConfig.getNvrChannel() > 0) {
+                if (cameraConfig.getOnvifPort() == 0) {
                     sendHttpGET("/api.cgi?cmd=GetAiState&channel=" + cameraConfig.getNvrChannel() + "&rs=openHAB"
                             + reolinkAuth);
                     sendHttpGET("/api.cgi?cmd=GetMdState&channel=" + cameraConfig.getNvrChannel() + "&rs=openHAB"
@@ -1779,12 +1780,13 @@ public class IpCameraHandler extends BaseThingHandler {
                             + reolinkAuth;
                 }
                 if (rtspUri.isEmpty()) {
-                    if (cameraConfig.getNvrChannel() < 1) {
+                    if (cameraConfig.getNvrChannel() < 0) {
                         rtspUri = "rtsp://" + cameraConfig.getIp() + ":554/h264Preview_01_main";
                     } else {
-                        rtspUri = "rtsp://" + cameraConfig.getIp() + ":554/h264Preview_0" + cameraConfig.getNvrChannel()
-                                + "_main";
+                        rtspUri = "rtsp://" + cameraConfig.getIp() + ":554/h264Preview_0"
+                                + (cameraConfig.getNvrChannel() + 1) + "_main";
                     }
+                    logger.debug("RTSP URL assumed to be {}", rtspUri);
                 }
                 break;
         }
@@ -1815,9 +1817,10 @@ public class IpCameraHandler extends BaseThingHandler {
             case ONVIF_THING:
                 return true;
             case REOLINK_THING:
-                if (cameraConfig.getNvrChannel() < 1) {
-                    return true;
-                }
+                return true;
+            // if (cameraConfig.getNvrChannel() < 0) {
+            // return true;
+            // }
         }
         return false;
     }

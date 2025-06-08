@@ -83,6 +83,15 @@ public class ReolinkHandler extends ChannelDuplexHandler {
             } else {
                 cutDownURL = requestUrl.substring(0, afterCommand);
             }
+            // Make sure the camera is still logged in if a token is being used
+            if (!ipCameraHandler.reolinkAuth.contains("&user=")) {
+                if (content.contains("please login first")) {
+                    ipCameraHandler.getReolinkToken();
+                    ReferenceCountUtil.release(msg);
+                    return;
+                }
+            }
+
             switch (cutDownURL) {// Use a cutdown URL as we can not use variables in a switch()
                 case "/api.cgi?cmd=Login":
                     ipCameraHandler.reolinkAuth = "&token=" + Helper.searchString(content, "\"name\" : \"");
@@ -97,6 +106,8 @@ public class ReolinkHandler extends ChannelDuplexHandler {
                                         + ipCameraHandler.cameraConfig.getUser() + "\" }}}]");
                     } else {
                         ipCameraHandler.logger.info("Your Reolink camera gave a bad login response:{}", content);
+                        // Try logging in again
+                        // ipCameraHandler.getReolinkToken();
                     }
                     break;
                 case "/api.cgi?cmd=GetAbility": // Used to check what channels the camera supports

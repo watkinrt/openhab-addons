@@ -35,8 +35,14 @@ public class ReolinkState {
             public Alarm vehicle = new Alarm();
         }
 
+        public class Error {
+            public String detail = "";
+            public int rspCode = 0;
+        }
+
         public String cmd = "";
         public int code = 0;
         public Value value = new Value();
+        public Error error = new Error();
     }
 }

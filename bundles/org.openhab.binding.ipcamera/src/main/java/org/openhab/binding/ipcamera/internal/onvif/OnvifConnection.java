@@ -12,7 +12,26 @@
  */
 package org.openhab.binding.ipcamera.internal.onvif;
 
-import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.*;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_ANIMAL_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_CAR_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_CELL_MOTION_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_DOORBELL;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_FACE_DETECTED;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_FIELD_DETECTION_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_GOTO_PRESET;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_HUMAN_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_LINE_CROSSING_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_MOTION_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_PAN;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_SCENE_CHANGE_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_STORAGE_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_TAMPER_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_TILT;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_TOO_BLURRY_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_TOO_BRIGHT_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_TOO_DARK_ALARM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.CHANNEL_ZOOM;
+import static org.openhab.binding.ipcamera.internal.IpCameraBindingConstants.SERVLET_PORT;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -375,8 +394,9 @@ public class OnvifConnection {
         } else if (message.contains("GetStreamUriResponse")) {
             rtspUri = Helper.fetchXML(message, ":MediaUri", ":Uri>");
             logger.debug("GetStreamUri:{}", rtspUri);
-            if (ipCameraHandler.cameraConfig.getFfmpegInput().isEmpty()) {
+            if (ipCameraHandler.rtspUri.isEmpty() && ipCameraHandler.cameraConfig.getFfmpegInput().isEmpty()) {
                 ipCameraHandler.rtspUri = rtspUri;
+                logger.debug("No stream URI set. Setting as {}.", rtspUri);
             }
         }
     }
@@ -621,10 +641,12 @@ public class OnvifConnection {
 
     public void eventRecieved(String eventMessage) {
         String topic = Helper.fetchXML(eventMessage, "Topic", "tns1:");
-        if (!topic.isEmpty()) {
+        // String sourceName = Helper.fetchXML(eventMessage, "tt:Source", "Name=\"");
+        String sourceValue = Helper.fetchXML(eventMessage, "tt:Source", "Value=\"");
+        if (!topic.isEmpty() && Integer.parseInt(sourceValue) == this.ipCameraHandler.cameraConfig.getNvrChannel()) {
             String dataName = Helper.fetchXML(eventMessage, "tt:Data", "Name=\"");
             String dataValue = Helper.fetchXML(eventMessage, "tt:Data", "Value=\"");
-            logger.debug("Onvif Event Topic:{}, Data:{}, Value:{}", topic, dataName, dataValue);
+            logger.debug("Onvif Event Topic:{}, Source:{}, Data:{}, Value:{}", topic, sourceValue, dataName, dataValue);
             switch (topic) {
                 case "RuleEngine/CellMotionDetector/Motion":
                     if ("true".equals(dataValue)) {

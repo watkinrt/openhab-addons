@@ -42,6 +42,7 @@ public class OnvifCodec extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(@Nullable ChannelHandlerContext ctx, @Nullable Object msg) throws Exception {
+        logger.trace("ONVIF channel read: {}, {}", ctx, msg);
         if (msg == null || ctx == null) {
             return;
         }
